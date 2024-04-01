@@ -1,0 +1,12 @@
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-demo30-service-20231130155638
+spec:
+  selector:
+    app: test-demo30-20231130155638
+  ports:
+  - protocol: TCP
+    port: 5000
+    targetPort: 5000

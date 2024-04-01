@@ -1,0 +1,36 @@
+[?1049h[22;0;0t[>4;2m[?1h=[?2004h[1;22r[?12h[?12l[27m[23m[29m[m[H[2J[?25l[22;1H"/tmp/kubectl-edit-54330766.yaml" 41 lines, 978 characters[1;1H# Please edit the object below. Lines beginning with a '#' will be ignored,
+# and an empty file will abort the edit. If an error occurs while saving this  [3;1Hfile will be
+# reopened with the relevant failures.
+#
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    meta.helm.sh/release-name: loki
+    meta.helm.sh/release-namespace: monitoring
+  creationTimestamp: "2023-12-07T22:43:06Z"
+  labels:
+    app: loki
+    app.kubernetes.io/managed-by: Helm
+    chart: loki-2.16.0
+    heritage: Helm
+    release: loki
+  name: loki
+  namespace: monitoring
+  resourceVersion: "3088442"[1;1H[?25h#[?2004l[>4;m[?25l[2;21r[2;1H[L[1;22r[2;1Hki.yaml[22;1H[K[2;8H[?25h[?2004h[>4;2m[?25l[22;1HType  :qa!  and press <Enter> to abandon all changes and exit Vim[2;7H[?25h[?25l[?25h[?25l[?25h[?2004l[>4;m[?25l[1;1Hspec:[1;6H[K[2;1H  clusterIP: 10.43.188.90
+  clusterIPs:[3;14H[K[4;1H    - 10.43.188.90
+  internalTrafficPolicy: Cluster[5;33H[K[6;1H  ipFamilies:
+    - IPv4[7;11H[K[8;1H  ipFamilyPolicy: SingleStack
+  ports:[9;9H[K[10;3H  - name: http-metrics
+      port: 3100[11;17H[K[12;5H  protocol: TCP[12;20H[K[13;3H    targetPort: http-metrics[13;31H[K[14;3Hselector:[16;5Hrelease: loki[16;18H[K[17;3HsessionAffinity: None
+  type: NodePort[18;17H[K[19;1Hstatus:[19;8H[K[20;3HloadBalancer: {}
+i.yaml[21;7H[K[21;1H[?25h[?25l[1;21r[21;1H
+[1;22r[20;1H[K[21;1Hi.yaml[22;1H[K[21;1H[?25h[?25l[1;21r[21;1H
+[1;22r[20;1H[K[21;1Hi.yaml[?25h[?25l[1;21r[21;1H
+[1;22r[20;1H[K[21;1Hi.yaml[?25h[?25l[1;21r[21;1H
+[1;22r[20;1H[K[21;1Hi.yaml[?25h[?25l:i.yaml:[?25h[?25lqi.yaml:q[?25h[?25lai.yaml:qa[?25h[?25l[1;21r[21;1H
+[1;22r[20;4H[K[21;1Hi.yaml[?25h
+[?2004l[?2004l[?1l>[>4;m[?1049l[23;0;0tVim: Error reading input, exiting...
+Vim: preserving files...
+Vim: Finished.
+[22;1H[J

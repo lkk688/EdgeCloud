@@ -1,0 +1,19 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-demo30-deployment-20231130155638
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: test-demo30-20231130155638
+  template:
+    metadata:
+      labels:
+        app: test-demo30-20231130155638
+    spec:
+      containers:
+      - name: mnist-data
+        image: sarvagya23/mnist-fix:1.0
+        command: ["python", "/app/mnist_classification_with_lenet_5_architecture.py"]

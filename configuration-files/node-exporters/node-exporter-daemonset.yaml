@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: node-exporter
+  template:
+    metadata:
+      labels:
+        app: node-exporter
+    spec:
+      containers:
+      - name: node-exporter
+        image: prom/node-exporter:v1.2.2 # Use the appropriate version
+        ports:
+        - containerPort: 9100
+          name: metrics
+        resources:
+          limits:
+            memory: 200Mi # Adjust resource limits as needed
+            cpu: 200m
+          requests:
+            memory: 100Mi # Adjust resource requests as needed
+            cpu: 100m
+      tolerations:
+      - operator: "Exists"
+      nodeSelector: {}
