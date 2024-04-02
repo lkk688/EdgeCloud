@@ -3,10 +3,30 @@
 ## Docker
 Install [Docker](https://docs.docker.com/engine/install/ubuntu/) and follow [Post-installation steps for Linux](https://docs.docker.com/engine/install/linux-postinstall/)
 
+You can also use this script to install the docker in one step:
+```bash
+./docker/install_docker.sh
+```
+After docker is installed, use the following script to perform the post-installation, i.e., rootless:
+```bash
+./docker/install_dockerpost.sh
+```
+Verify the docker installation via the following script:
+```bash
+./docker/verify_docker.sh
+```
+
+
+## Nvidia Container Runtime
 Setup Docker and nvidia container runtime via [nvidiacontainer1](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) [nvidiacontainer2](https://docs.nvidia.com/dgx/nvidia-container-runtime-upgrade/index.html
 )
 
+You can use this automatic script to install nvidia container runtime:
+```bash
+./docker/install_postnvidiacontainer.sh
+```
 
+## Run Containers
 After you build the container, you can check the new container via "docker images", note down the image id, and run this image:
 ```bash
 sudo docker run -it --rm 486a56765aad
@@ -31,7 +51,7 @@ Popular Docker commands:
  * Delete docker images: docker image rm dockerimageid
 
 
-## K3S for GPUs
+## Install K3S
 [K3s](https://docs.k3s.io/installation). Install K3s using the Installation Script via [K3squickstart](https://docs.k3s.io/quick-start). The installation script is the easiest way to set up K3s as a service on systemd and openrc based systems. Run the following command on the master node to install K3s and start the service automatically:
 ```bash
 curl -sfL https://get.k3s.io | sh -
@@ -51,6 +71,7 @@ rm -rf /var/lib/rancher/k3s
 You can also install and uninstall K3S via our script
 ```bash
 lkk@dellr530:~/MyRepo/DeepDataMiningLearning/docker$ ./k3s-install.sh
+./k3s-uninstall.sh
 ```
 
 A single-node server installation is a fully-functional Kubernetes cluster, including all the datastore, control-plane, kubelet, and container runtime components necessary to host workload pods. It is not necessary to add additional server or agents nodes, but you may want to do so to add additional capacity or redundancy to your cluster.
@@ -62,7 +83,7 @@ NAME       STATUS   ROLES                  AGE   VERSION
 dellr530   Ready    control-plane,master   24s   v1.28.8+k3s1
 ```
 
-Remove MicroK8S
+If your system has MicroK8S installed and running, you need to remove MicroK8S
 ```bash
 sudo microk8s reset
 sudo snap remove microk8s
@@ -93,6 +114,7 @@ We can see a basic K3s setup composed by:
 
 Instead of running components in different processes, K3s will run all in a single server or agent process. As it is packaged in a single file, we can also work offline, using an Air-gap installation. Interestingly, we can also run K3s in Docker using K3d.
 
+## K3S Nginx Server
 Test Nginx image with 2 replicas available on port 80:
 ```bash
 $ kubectl create deployment nginx --image=nginx --port=80 --replicas=2
@@ -192,6 +214,7 @@ endpointslice.discovery.k8s.io "kubernetes" deleted
 lkk@dellr530:~$ kubectl get pods,services,endpointslices
 ```
 
+## K3S Jupyter
 Set up a Jupyter Lab pod in K3s cluster 
 ```bash
 lkk@dellr530:~$ kubectl create deployment jupyter-lab --image=jupyter/base-notebook
@@ -210,7 +233,7 @@ lkk@dellr530:~$ kubectl exec -it pod/jupyter-lab-d7bdfb78b-q4pj4 -- /bin/bash
 ```
 In 'image' part, The hostname of the container image registry (e.g., Docker Hub, Google Container Registry, etc.). If omitted, Kubernetes assumes the Docker public registry. Open your web browser and visit "http://130.65.157.217:8888". You should see the Jupyter Lab interface.
 
-
+## Helm
 Install Helm
 ```bash
 curl https://raw.githubusercontent.com/helm/helm/HEAD/scripts/get-helm-3 | bash
@@ -224,7 +247,7 @@ https://www.digitalocean.com/community/tutorials/how-to-setup-k3s-kubernetes-clu
 Execute the following command to see all Kubernetes objects deployed in the cluster in the kube-system namespace. kubectl is installed automatically during the K3s installation and thus does not need to be installed individually.
 
 
-
+## K3S GPU Access
 Installing the NVIDIA drivers on the K3s node. 
 
 The second step is to install the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/overview.html), which helps to expose the GPU resources from the K3S node to the containers running on it. The third step is to tell K3S to use this toolkit to enable GPUs on the containers. One point to pay attention to is to install only the containerd version of the toolkit. K3S does not use Docker at all, since Kubernetes already deprecated Docker, and it uses only the containerd to manage containers. Installing also the Docker support won’t impact how your cluster works since it will also implicitly install the containerd support, but since we avoid installing unnecessary packages on our lean Kubernetes nodes, we directly go with the containerd installation. ()
