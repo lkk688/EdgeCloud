@@ -74,10 +74,12 @@ lkk@dellr530:~/MyRepo/DeepDataMiningLearning/docker$ ./k3s-install.sh
 ./k3s-uninstall.sh
 ```
 
+
 A single-node server installation is a fully-functional Kubernetes cluster, including all the datastore, control-plane, kubelet, and container runtime components necessary to host workload pods. It is not necessary to add additional server or agents nodes, but you may want to do so to add additional capacity or redundancy to your cluster.
 ```bash
 #check server address
-kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}'
+lkk@dellr530:~/MyRepo/EdgeCloud$ kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}'
+https://127.0.0.1:6443
 $ kubectl get nodes
 NAME       STATUS   ROLES                  AGE   VERSION
 dellr530   Ready    control-plane,master   24s   v1.28.8+k3s1
@@ -106,6 +108,17 @@ kube-system   traefik-f4564c4f4-tsw86                   1/1     Running     0   
 $ kubectl get pods
 No resources found in default namespace.
 ```
+
+Check K3S cluster info:
+```bash
+lkk@dellr530:~/MyRepo/EdgeCloud$ kubectl --kubeconfig=/etc/rancher/k3s/k3s.yaml cluster-info
+Kubernetes control plane is running at https://127.0.0.1:6443
+CoreDNS is running at https://127.0.0.1:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+Metrics-server is running at https://127.0.0.1:6443/api/v1/namespaces/kube-system/services/https:metrics-server:https/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+```
+
 We can see a basic K3s setup composed by:
     * Traefik as an ingress controller for HTTP reverse proxy and load balancing
     * CoreDns to manage DNS resolution inside the cluster and nodes
@@ -113,6 +126,85 @@ We can see a basic K3s setup composed by:
     * Helm, which we can use to customize packaged components
 
 Instead of running components in different processes, K3s will run all in a single server or agent process. As it is packaged in a single file, we can also work offline, using an Air-gap installation. Interestingly, we can also run K3s in Docker using K3d.
+
+## Kubernetes Basics
+Kubernetes helps you make sure containerized applications run where and when you want, and helps them find the resources and tools they need to work. Once you have a running Kubernetes cluster, you can deploy your containerized applications on top of it. To do so, you create a Kubernetes Deployment. The Deployment instructs Kubernetes how to create and update instances of your application. Once you've created a Deployment, the Kubernetes control plane schedules the application instances included in that Deployment to run on individual Nodes in the cluster. Once the application instances are created, a Kubernetes Deployment controller continuously monitors those instances. If the Node hosting an instance goes down or is deleted, the Deployment controller replaces the instance with an instance on another Node in the cluster. This provides a self-healing mechanism to address machine failure or maintenance. By both creating your application instances and keeping them running across Nodes, Kubernetes Deployments provide a fundamentally different approach to application management.
+
+You can create and manage a Deployment by using the Kubernetes command line interface, **kubectl**. Kubectl uses the Kubernetes API to interact with the cluster. The common format of a kubectl command is: `kubectl action resource`. You can check the version of kubectl: `kubectl version --short`
+
+When you created a Deployment, Kubernetes created a Pod to host your application instance. A Kubernetes Pod is a group of one or more Containers, tied together for the purposes of administration and networking. A Pod is a Kubernetes abstraction that represents a group of one or more application containers (such as Docker), and some shared resources for those containers. Those resources include: 1)Shared storage, as Volumes; 2) Networking, as a unique cluster IP address; 3) Information about how to run each container, such as the container image version or specific ports to use. A Pod models an application-specific "logical host" and can contain different application containers which are relatively tightly coupled. Pods are the atomic unit on the Kubernetes platform. When we create a Deployment on Kubernetes, that Deployment creates Pods with containers inside them (as opposed to creating containers directly). A Kubernetes Deployment checks on the health of your Pod and restarts the Pod's Container if it terminates. Deployments are the recommended way to manage the creation and scaling of Pods.
+
+Each Pod is tied to the Node where it is scheduled, and remains there until termination (according to restart policy) or deletion. In case of a Node failure, identical Pods are scheduled on other available Nodes in the cluster. A Pod always runs on a Node. A Node is a worker machine in Kubernetes and may be either a virtual or a physical machine, depending on the cluster. Each Node is managed by the control plane. A Node can have multiple pods, and the Kubernetes control plane automatically handles scheduling the pods across the Nodes in the cluster. The control plane's automatic scheduling takes into account the available resources on each Node. Every Kubernetes Node runs at least: 1) Kubelet, a process responsible for communication between the Kubernetes control plane and the Node; it manages the Pods and the containers running on a machine. 2) A container runtime (like Docker) responsible for pulling the container image from a registry, unpacking the container, and running the application.
+
+Use the kubectl create command to create a Deployment that manages a Pod. The Pod runs a Container based on the provided Docker image. When you create a Deployment, you'll need to specify the container image for your application and the number of replicas that you want to run. This example is a hello-node application packaged in a Docker container that uses NGINX to echo back all the requests.
+```bash
+# Run a test container image that includes a webserver
+lkk@dellr530:~/MyRepo/EdgeCloud$ kubectl create deployment hello-node --image=registry.k8s.io/e2e-test-images/agnhost:2.39 -- /agnhost netexec --http-port=8080
+lkk@dellr530:~/MyRepo/EdgeCloud$ kubectl get deployments
+NAME         READY   UP-TO-DATE   AVAILABLE   AGE
+hello-node   1/1     1            1           3m46s
+```
+Create a Kubernetes deployment (hello-node) using the specified image (agnhost:2.39) and run the netexec tool inside the container on port 8080. `--image` specifies the Docker image to use for the deployment. runs the `/agnhost netexec` command inside the container. The netexec tool is part of the agnhost image. The --http-port=8080 flag indicates that the netexec tool should listen on port 8080.
+
+The most common operations can be done with the following kubectl subcommands:
+  * `kubectl get` - list resources
+  * `kubectl describe` - show detailed information about a resource
+  * `kubectl logs` - print the logs from a container in a pod
+  * `kubectl exec` - execute a command on a container in a pod
+
+See the pod information. We'll use the kubectl get command and look for existing Pods:
+```bash
+#view the pods
+lkk@dellr530:~/MyRepo/EdgeCloud$ kubectl get pods
+NAME                         READY   STATUS    RESTARTS   AGE
+hello-node-ccf4b9788-nk2dn   1/1     Running   0          4m36s
+lkk@dellr530:~/MyRepo/EdgeCloud$ kubectl describe pod hello-node-ccf4b9788-nk2dn
+```
+To view what containers are inside that Pod and what images are used to build those containers we run the `kubectl describe pods` command. We see here details about the Pod’s container: IP address, the ports used and a list of events related to the lifecycle of the Pod.
+
+View cluster events:
+```bash
+kubectl get events #You can see the timeline of the events
+```
+
+View the kubectl configuration:
+```bash
+lkk@dellr530:~/MyRepo/EdgeCloud$ kubectl config view
+```
+
+View application logs for a container in a pod.
+```bash
+lkk@dellr530:~/MyRepo/EdgeCloud$ kubectl logs hello-node-ccf4b9788-nk2dn
+I0402 16:56:26.527763       1 log.go:195] Started HTTP server on port 8080
+I0402 16:56:26.527904       1 log.go:195] Started UDP server on port  8081
+```
+
+By default, the Pod is only accessible by its internal IP address within the Kubernetes cluster (running inside Kubernetes are running on a private, isolated network). By default they are visible from other pods and services within the same Kubernetes cluster, but not outside that network. 
+
+
+To make the hello-node Container accessible from outside the Kubernetes virtual network, you have two options: 1) The `kubectl proxy` command can create a proxy that will forward communications into the cluster-wide, private network; 2) expose the Pod as a **Kubernetes Service**.
+
+Expose the Pod to the public internet using the kubectl expose command:
+```bash
+lkk@dellr530:~/MyRepo/EdgeCloud$ kubectl expose deployment hello-node --type=LoadBalancer --port=8080
+service/hello-node exposed
+```
+> The --type=LoadBalancer flag indicates that you want to expose your Service outside of the cluster. The application code inside the test image only listens on TCP port 8080. If you used kubectl expose to expose a different port, clients could not connect to that other port.
+
+View the Service you created:
+```bash
+lkk@dellr530:~/MyRepo/EdgeCloud$ kubectl get services
+NAME         TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)          AGE
+kubernetes   ClusterIP      10.43.0.1       <none>           443/TCP          25m
+hello-node   LoadBalancer   10.43.126.242   130.65.157.217   8080:32659/TCP   67s
+```
+You can access the server via the browser "http://130.65.157.217:8080/"
+
+You can clean up the resources you created in your cluster:
+```bash
+kubectl delete service hello-node
+kubectl delete deployment hello-node
+```
 
 ## K3S Nginx Server
 Test Nginx image with 2 replicas available on port 80:
@@ -197,6 +289,11 @@ root@nginx-7c5ddbdf54-5nczm:/# cat /etc/nginx/nginx.conf
 #If you made changes to the configuration, restart NGINX inside the Pod: service nginx restart
 #exit the Pod by typing exit
 ```
+Delete deployment:
+```bash
+lkk@dellr530:~/MyRepo/EdgeCloud$ kubectl get deployments
+lkk@dellr530:~/MyRepo/EdgeCloud$ kubectl delete deployment nginx
+```
 
 Delete resources. If your Pods are managed by a Deployment (which is common in production environments), consider scaling down the Deployment to zero replicas:
 ```bash
@@ -212,6 +309,14 @@ ingress.networking.k8s.io "nginx" deleted
 lkk@dellr530:~$ kubectl delete endpointslice --all
 endpointslice.discovery.k8s.io "kubernetes" deleted
 lkk@dellr530:~$ kubectl get pods,services,endpointslices
+```
+
+You can also forcefully delete one pod:
+```bash
+$ kubectl describe pod [pod_name] -n [namespace]
+$ docker ps
+#Once it's verified that the container isn't present, run the following command to delete the pod forcefully.
+$ kubectl delete pod [pod_name] -n [namespace] --grace-period 0 --force
 ```
 
 ## K3S Jupyter
