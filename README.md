@@ -1,4 +1,8 @@
 # EdgeCloud
+## System Architecture
+Our proposed system has two main parts: 1) Custom AI Backend with Multi-tenancy: Manages AI workloads for multiple users and applications; 2) Front facing edge cloud dashboard for users to control, monitor, and orchestrate their AI work load in the hybrid private and public cloud infrastructures. The overall architecture is shown here:
+
+<img width="1189" alt="image" src="https://github.com/lkk688/EdgeCloud/assets/6676586/c6b2ebee-05d8-4013-9af5-5018b3ad6ceb">
 
 ## Docker
 Install [Docker](https://docs.docker.com/engine/install/ubuntu/) and follow [Post-installation steps for Linux](https://docs.docker.com/engine/install/linux-postinstall/)
